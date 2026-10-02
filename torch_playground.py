@@ -20,26 +20,30 @@ print(f"PyTorch {torch.__version__} | device: {device}")
 # ---- code ----
 
 "Settings"
-N = 10                         # batch size
-D_in = 1                       # inputs/batch
-D_out = 1                      # outputs/batch
-
+N = 10                                          # batch size
+D_in = 1                                        # inputs/batch
+D_out = 1                                       # outputs/batch
 learning_rate = 0.1
 epochs = 1000
 
-X = torch.randn(N, D_in)       # random tensor
-W_true = torch.tensor([[2.0]]) # our set weight
-b_true = torch.tensor([1.0])   # our set bias
-y_true = X @ W_true + b_true   # expected value of y
+"Actual"
+X = torch.randn(N, D_in)                        # random tensor
+W_true = torch.tensor([[2.0]])                  # our set weight
+b_true = torch.tensor([1.0])                    # our set bias
+y_true = X @ W_true + b_true                    # expected value of y
+
+"Prediction"
+W = torch.rand(D_in, D_out, requires_grad=True) # random weight
+b = torch.rand(D_out, requires_grad=True)       # random bias
+y_hat = X @ W + b                               # predicted value of y
+
+"Embedding"
+vocab_size = 70                                 # our dict: 10 unique words
+embedding_dim = 3                               # each word = 3D vector
 
 "1 manual epoch"
-# W = torch.rand(D_in, D_out, requires_grad=True) # random weight
-# b = torch.rand(D_out, requires_grad=True)       # random bias
-
 # print(f"Initial W: {W}\n")
 # print(f"Initial b: {b}\n")
-
-# y_hat = X @ W + b # predicted value of y
 
 # print(f"Prediction: {y_hat}\n")
 # print(f"Actual: {y_true}\n")
@@ -57,14 +61,6 @@ y_true = X @ W_true + b_true   # expected value of y
 # print(f"Gradient for b: \n{b.grad}\n")
 
 "1000 automated epochs"
-# W_true = torch.tensor([[2.0]])
-# b_true = torch.tensor([1.0])
-# X = torch.rand(N, D_in)
-# y = X @ W_true + b_true
-
-# W = torch.rand(D_in, D_out, requires_grad=True)
-# b = torch.rand(D_out, requires_grad=True)
-
 # for epoch in range(epochs):
 #     y_hat = X @ W + b
 
@@ -97,9 +93,6 @@ y_true = X @ W_true + b_true   # expected value of y
 # print(f"Output of nn_linear: {y_hat_nn}\n")
 
 "2. Embedding"
-# vocab_size = 70   # our dict: 10 unique words
-# embedding_dim = 3 # each word = 3D vector
-
 # embedding_layer = nn.Embedding(vocab_size, embedding_dim)
 
 # input_ids = torch.tensor([[1, 36, 67, 69]])
@@ -134,6 +127,21 @@ class LinearRegression(nn.Module):
 model = LinearRegression(in_features=1, out_features=1)
 print(model)
 
+# class FeedForward(nn.Module):
+#     def __init__(self, embedding_dim, ff_dim):
+#         super().__init__()
+
+#         self.up = nn.Linear(embedding_dim, ff_dim)   # up projection
+#         self.activation = nn.GELU()
+#         self.down = nn.Linear(ff_dim, embedding_dim) # down projection
+
+#     def forward(self, X):
+#         X = self.up(X)
+#         X = self.activation(X)
+#         X = self.down(X)
+#         return X
+
+
 "5. Optimizer"
 optimizer = optim.Adam(model.parameters(), lr=learning_rate) # model.parameters() -> which tensors to manage
 loss_fn = nn.MSELoss()
@@ -147,7 +155,7 @@ loss_fn = nn.MSELoss()
 # optimizer.step()
 
 "7. Full loop"
-for epoch in range (epochs) : 
+for epoch in range (epochs): 
     y_hat = model(X)
     loss = loss_fn(y_hat, y_true)
     # loss = F.mse_loss(y_hat, y_true)
